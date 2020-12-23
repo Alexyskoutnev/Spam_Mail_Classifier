@@ -3,6 +3,8 @@ import pandas as pd
 import sklearn.model_selection
 from sklearn.linear_model import LogisticRegression
 from sklearn import svm
+from sklearn.tree import DecisionTreeClassifier
+from sklearn.ensemble import RandomForestClassifier
 from sklearn.model_selection import cross_val_score
 import matplotlib.pyplot as plt
 from sklearn.metrics import classification_report, confusion_matrix
@@ -54,14 +56,23 @@ def Support_Vector_Machine(X,Y):
 
 #by
 
+#Decision Tree
+def Decision_Tree(X, Y):
+    model = RandomForestClassifier(n_estimators=50, random_state=0)
+    model.fit(X,Y)
+    return Model
 
 def result():
+    Decision_Model = Decision_Tree(*train_data(spam))
+    print("Decision Tree Training set score: {:.3f}".format(Decision_Model.score(*train_data(spam))))
+    print("Decision Tree Test set score: {:.3f}".format(Decision_Model.score(*test_data(spam))))
     Log_Model = Logistic_Regression(*train_data(spam))
     print("Logistic Training set score: {:.3f}".format(Log_Model.score(*train_data(spam))))
     print("Logistic Test set score: {:.3f}".format(Log_Model.score(*test_data(spam))))
     SVM_Model = Support_Vector_Machine(*train_data(spam))
     print("SVM Training set score: {:.3f}".format(SVM_Model.score(*train_data(spam))))
     print("SVM Test set score: {:.3f}".format(SVM_Model.score(*test_data(spam))))
+
 
 def main():
     pass
