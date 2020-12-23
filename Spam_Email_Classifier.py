@@ -60,7 +60,7 @@ def Support_Vector_Machine(X,Y):
 def Decision_Tree(X, Y):
     model = RandomForestClassifier(n_estimators=50, random_state=0)
     model.fit(X,Y)
-    return Model
+    return model
 
 def result():
     Decision_Model = Decision_Tree(*train_data(spam))
