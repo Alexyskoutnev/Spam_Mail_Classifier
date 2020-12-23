@@ -31,25 +31,26 @@ def Logistic_Regression(X,Y):
             if (test_result > test_accuracy):
                 test_accuracy = test_result
                 C_max = i
-        print(C_max)
         model = LogisticRegression(C = C_max, random_state=0).fit(X, Y)
         return model
 
 #Support Vector Machine
 def Support_Vector_Machine(X,Y):
-    kernels = ['linear', 'rbf', 'polynomial']
-    C_range = [0.001, 0.01, .1, 1, 10, 100, 1000]
+    kernel_type = ['linear', 'rbf']
+    C_range = [.1, 1, 10, 100, 1000]
     test_accuracy = -1
-    for type in kernels:
+    for type in kernel_type:
         for C_type in C_range:
-            model = svm.SVC(C = C_type, kernel = type)
+            model = svm.SVC(kernel= type, C = C_type, max_iter= 100000)
             model.fit(X, Y)
             test_result = model.score(*test_data(spam))
             if (test_result > test_accuracy):
                 test_accuracy = test_result
-                kernel_type = type
+                print(test_result)
+                print(type)
                 C_max = C_type
-    model = svm.SVC(C = C_max, kernel = type)
+                kernel_max = type
+    model = svm.SVC(C = C_max, kernel = kernel_max)
     model.fit(X, Y)
     return model
 
