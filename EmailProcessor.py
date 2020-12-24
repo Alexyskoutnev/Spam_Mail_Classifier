@@ -10,7 +10,7 @@ def read_train():
     spam = pd.read_csv('spam.csv', encoding='latin-1')
     spam = spam.drop(['Unnamed: 2', 'Unnamed: 3', 'Unnamed: 4'], axis=1)
     spam = spam.replace(['ham', 'spam'], [0, 1])
-    df_main = pd.DataFrame(columns=['crl.tot', 'dollar', 'bang', 'money', 'n000', 'make', 'free', 'spam'])
+    df_main = pd.DataFrame(columns=['crl.tot', 'dollar', 'bang', 'money', 'n000', 'make', 'free', "click", "now", "cash", "quick", "easy", "offer", "order", "email", "time", "credit", "address", "people", 'spam'])
     frame = []
     for idx, series in spam.iterrows():
         data_dict = email_decoder(series['v2'])
@@ -29,4 +29,16 @@ def email_decoder(data):
     zero_count = x.count("000")
     make_count = x.count("make")
     free_count = x.count("free")
-    return {"crl.tot": capital_num, 'dollar': dollar_count, 'bang': bang_count, 'money': money_count, 'n000': zero_count, 'make': make_count, 'free': free_count}
+    click_count = x.count("click")
+    now_count = x.count("now")
+    cash_count = x.count("cash")
+    quick_count = x.count("quick")
+    easy_count= x.count("easy")
+    offer_count = x.count("offer")
+    order_count = x.count("order")
+    email_count = x.count("email")
+    time_count = x.count("time")
+    credit_count = x.count("credit")
+    address_count = x.count("address")
+    people_count = x.count("people")
+    return {"crl.tot": capital_num, 'dollar': dollar_count, 'bang': bang_count, 'money': money_count, 'n000': zero_count, 'make': make_count, 'free': free_count, 'click': click_count, 'now': now_count, 'cash': cash_count, 'quick': quick_count, 'easy': easy_count, 'offer': offer_count, 'order':order_count, 'email': email_count, 'time': time_count, 'credit': credit_count, 'address': address_count, 'people': people_count}

@@ -27,10 +27,10 @@ def test_data(data):
 
 #LogisticRegression
 def Logistic_Regression(X,Y, dataset):
-        C_range = [0.0001, 0.001, 0.01, .1, 1, 10, 100, 1000, 10000]
+        C_range = [0.01, .1, 1, 10, 100, 1000]
         test_accuracy = -1
         for i in C_range:
-            model = LogisticRegression(C = i, random_state=0, max_iter= 10000000).fit(X, Y)
+            model = LogisticRegression(C = i, random_state=0, max_iter= 1000000).fit(X, Y)
             test_result = model.score(*test_data(dataset))
             if (test_result > test_accuracy):
                 test_accuracy = test_result
@@ -66,7 +66,7 @@ def Support_Vector_Model(Dataset):
 
 #Decision Tree
 def Decision_Tree(X, Y):
-    model = RandomForestClassifier(n_estimators=50, random_state=0)
+    model = RandomForestClassifier(n_estimators=100, random_state=0)
     model.fit(X,Y)
     return model
 
@@ -84,13 +84,15 @@ def result(Dataset):
     SVM_Model = Support_Vector_Machine(*train_data(Dataset), Dataset)
     print("SVM Training set score: {:.3f}".format(SVM_Model.score(*train_data(Dataset))))
     print("SVM Test set score: {:.3f}".format(SVM_Model.score(*test_data(Dataset))))
-def Spam_printer(w, type):
+def Spam_printer(w, type, name):
+    """
+    w writes to the console if
+    text is spam or not
+    """
     if (type[0] == 0):
-        w.write("Not Spam")
-        print()
+        w.write(str(name) + ": Not Spam" + "\n")
     elif (type[0] == 1):
-        w.write("Spam")
-        print()
+        w.write(str(name)+ ": Spam" + "\n")
 
 def spam_solve(r, w):
     """
@@ -103,22 +105,10 @@ def spam_solve(r, w):
     for x in lines:
         MSG += x.replace("\n", " ")
     test_output = read_file(MSG)
-    x_test, y_test = train_data(Dataset)
-    # print(test_output)
-    # print(x_test[1])
-    # print(y_test[1])
-    #print(Logistic_Regression(*train_data(Dataset), Dataset).predict(test_output))
     Log_Model = Logistic_Model(Dataset)
-    Spam_printer(w, Log_Model.predict(test_output))
+    Spam_printer(w, Log_Model.predict(test_output), LogisticRegression.__name__)
     Decision_Model = Decision_Tree_Model(Dataset)
-    Spam_printer(w, Decision_Model.predict(test_output))
+    Spam_printer(w, Decision_Model.predict(test_output), RandomForestClassifier.__name__)
     SVM_Model = Support_Vector_Model(Dataset)
-    Spam_printer(w, SVM_Model.predict(test_output))
-
-def main():
-    pass
-    # print("SVM Training set score: {:.3f}".format(Support_Vector_Machine.score(*train_data(spam))))
-    # print("SVM Test set score: {:.3f}".format(LogisticRegression.score(*train_data(spam))))
-    #print(LogisticRegression(*train_data(spam)).score(*test_data(spam)))
-    # print("Logistic Training set score: {:.3f}".format(LogisticRegression.score(*train_data(spam))))
-    # print("Logistic Test set score: {:.3f}".format(LogisticRegression.score(*train_data(spam))))
+    Spam_printer(w, SVM_Model.predict(test_output), svm.SVC.__name__)
+    #result(Dataset)
