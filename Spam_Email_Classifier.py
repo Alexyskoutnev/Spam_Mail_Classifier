@@ -7,6 +7,8 @@ from sklearn.tree import DecisionTreeClassifier
 from sklearn.ensemble import RandomForestClassifier
 from sklearn.model_selection import cross_val_score
 import matplotlib.pyplot as plt
+from EmailProcessor import read_file
+from EmailProcessor import read_train
 from sklearn.metrics import classification_report, confusion_matrix
 
 #spam = pd.read_csv('spambase.data')
@@ -42,8 +44,8 @@ def Logistic_Model(Dataset):
 
 #Support Vector Machine
 def Support_Vector_Machine(X,Y, dataset):
-    kernel_type = ['linear', 'rbf']
-    C_range = [.1, 1, 10, 100, 1000, 10000]
+    kernel_type = ['rbf']
+    C_range = [0.01, 1, 10, 100]
     test_accuracy = -1
     for type in kernel_type:
         for C_type in C_range:
@@ -82,7 +84,36 @@ def result(Dataset):
     SVM_Model = Support_Vector_Machine(*train_data(Dataset), Dataset)
     print("SVM Training set score: {:.3f}".format(SVM_Model.score(*train_data(Dataset))))
     print("SVM Test set score: {:.3f}".format(SVM_Model.score(*test_data(Dataset))))
+def Spam_printer(w, type):
+    if (type[0] == 0):
+        w.write("Not Spam")
+        print()
+    elif (type[0] == 1):
+        w.write("Spam")
+        print()
 
+def spam_solve(r, w):
+    """
+    r a reader
+    w a writer
+    """
+    Dataset = read_train()
+    lines = r.readlines()
+    MSG = ''
+    for x in lines:
+        MSG += x.replace("\n", " ")
+    test_output = read_file(MSG)
+    x_test, y_test = train_data(Dataset)
+    # print(test_output)
+    # print(x_test[1])
+    # print(y_test[1])
+    #print(Logistic_Regression(*train_data(Dataset), Dataset).predict(test_output))
+    Log_Model = Logistic_Model(Dataset)
+    Spam_printer(w, Log_Model.predict(test_output))
+    Decision_Model = Decision_Tree_Model(Dataset)
+    Spam_printer(w, Decision_Model.predict(test_output))
+    SVM_Model = Support_Vector_Model(Dataset)
+    Spam_printer(w, SVM_Model.predict(test_output))
 
 def main():
     pass

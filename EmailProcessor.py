@@ -1,6 +1,11 @@
 import pandas as pd
 from collections import Counter
 
+def read_file(MSG):
+    data = pd.DataFrame([email_decoder(MSG)])
+    X = data.values
+    return X
+
 def read_train():
     spam = pd.read_csv('spam.csv', encoding='latin-1')
     spam = spam.drop(['Unnamed: 2', 'Unnamed: 3', 'Unnamed: 4'], axis=1)
