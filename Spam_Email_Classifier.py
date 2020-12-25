@@ -8,11 +8,11 @@ from sklearn.ensemble import RandomForestClassifier
 from sklearn.model_selection import cross_val_score
 import matplotlib.pyplot as plt
 from EmailProcessor import read_train
+from sklearn.naive_bayes import MultinomialNB, GaussianNB, BernoulliNB
 from sklearn.metrics import classification_report, confusion_matrix
 from sklearn.feature_extraction.text import TfidfVectorizer
 from sklearn.feature_extraction.text import CountVectorizer
 from EmailProcessor import read_file
-from sklearn.naive_bayes import GaussianNB
 from EmailProcessor import clean_up
 
 #spam = pd.read_csv('spambase.data')
@@ -30,27 +30,32 @@ def test_data(data):
     x_train, x_test, y_train, y_test = sklearn.model_selection.train_test_split(X, Y, test_size=0.2, random_state=0)
     return x_test, y_test
 
-def process_data():
+def process_data(output):
     Dataset = read_file()
     y_train, x_train = train_data(Dataset)
     y_test, x_test = test_data(Dataset)
     x_train = [txt.split(" ") for txt in x_train]
     x_test = [txt.split(" ") for txt in x_test]
-    x_train_features = Vectorize_data(x_train)
-    x_test_features = Vectorize_data(x_test)
-    return x_train_features.toarray(), x_test_features.toarray(), y_train, y_test
+    vectorizer = fit_vector(x_train)
+    x_train_features = Vectorize_data(x_train, vectorizer)
+    x_test_features = Vectorize_data(x_test, vectorizer)
+    x_output = Vectorize_data(output, vectorizer)
+    return x_train_features.toarray(), x_test_features.toarray(), y_train.ravel(), y_test.ravel(), x_output
 
+def fit_vector(data):
+    vectorizer = CountVectorizer()
+    raw_sentences = [' '.join(o) for o in data]
+    vectorizer.fit(raw_sentences)
+    return vectorizer
 
-def Vectorize_data(data):
-    vectorizer = TfidfVectorizer()
+def Vectorize_data(data, vectorizer):
     sentences = [' '.join(txt) for txt in data]
-    vectorizer.fit(sentences)
     return vectorizer.transform(sentences)
 
-def data_features(data):
-    vectorizer = TfidfVectorizer()
-    raw_sentences = [' '.join(o) for o in data]
-    return vectorizer.transform(raw_sentences)
+# def data_features(data):
+#     vectorizer = TfidfVectorizer()
+#     raw_sentences = [' '.join(o) for o in data]
+#     return vectorizer.transform(raw_sentences)
 
 # def process_data(data):
 #     #Message = X.split(" ")
@@ -64,16 +69,16 @@ def Gaussian_Regression(X,Y):
     return model
 
 #LogisticRegression
-def Logistic_Regression(X,Y, dataset):
+def Logistic_Regression(X_train,Y_train, X_test, Y_test):
         C_range = [0.01, .1, 1, 10, 100, 1000]
         test_accuracy = -1
         for i in C_range:
-            model = LogisticRegression(C = i, random_state=0, max_iter= 1000000).fit(X, Y)
-            test_result = model.score(*test_data(dataset))
+            model = LogisticRegression(C = i, random_state=0, max_iter= 1000000).fit(X_train, Y_train)
+            test_result = model.score(X_test, Y_test)
             if (test_result > test_accuracy):
                 test_accuracy = test_result
                 C_max = i
-        model = LogisticRegression(C = C_max, random_state=0).fit(X, Y)
+        model = LogisticRegression(C = C_max, random_state=0).fit(X_train, Y_train)
         return model
 
 def Logistic_Model(Dataset):
@@ -81,21 +86,23 @@ def Logistic_Model(Dataset):
     return Log_Model
 
 #Support Vector Machine
-def Support_Vector_Machine(X,Y, dataset):
-    kernel_type = ['rbf']
-    C_range = [0.01, 1, 10, 100]
-    test_accuracy = -1
-    for type in kernel_type:
-        for C_type in C_range:
-            model = svm.SVC(kernel= type, C = C_type, max_iter= 1000000)
-            model.fit(X, Y)
-            test_result = model.score(*test_data(dataset))
-            if (test_result > test_accuracy):
-                test_accuracy = test_result
-                C_max = C_type
-                kernel_max = type
-    model = svm.SVC(C = C_max, kernel = kernel_max)
-    model.fit(X, Y)
+def Support_Vector_Machine(x_train,y_train, x_test, y_test):
+    # kernel_type = ['rbf']
+    # C_range = [0.01, 1, 10, 100]
+    # test_accuracy = -1
+    # for type in kernel_type:
+    #     for C_type in C_range:
+    #         model = svm.SVC(kernel= type, C = C_type, max_iter= 1000000)
+    #         model.fit(x_train, y_train)
+    #         test_result = model.score(x_test, y_test)
+    #         if (test_result > test_accuracy):
+    #             test_accuracy = test_result
+    #             C_max = C_type
+    #             kernel_max = type
+    # model = svm.SVC(C = C_max, kernel = kernel_max)
+    # model.fit(x_train, y_train)
+    model = svm.SVC(kernel= 'rbf', C = 10)
+    model.fit(x_train, y_train)
     return model
 
 def Support_Vector_Model(Dataset):
@@ -104,7 +111,7 @@ def Support_Vector_Model(Dataset):
 
 #Decision Tree
 def Decision_Tree(X, Y):
-    model = RandomForestClassifier(n_estimators=100, random_state=0)
+    model = RandomForestClassifier(n_estimators=50, random_state=0)
     model.fit(X,Y)
     return model
 
@@ -152,15 +159,22 @@ def spam_solve(r, w):
     #result(Dataset)
 
 def solver(r,w):
-    Dataset = read_file()
     lines = r.readlines()
     MSG = ''
     for x in lines:
         MSG += x.replace("\n", " ")
-    test_output = clean_up(MSG).split(" ")
-    test_output_features = Vectorize_data(test_output)
-    x_train, x_test, y_train, y_test = process_data()
-    Gaussian_Model = Gaussian_Regression()
+    test_output = clean_up(MSG)
+    x_train, x_test, y_train, y_test, text_vectorized = process_data(test_output)
+    #Log_Model = Logistic_Regression(x_train,y_train,x_test,y_test)
+    #Spam_printer(w, Log_Model.predict(test_output), LogisticRegression.__name__)
+    Log_model = LogisticRegression().fit(x_train, y_train)
+    Spam_printer(w, Log_model.predict(text_vectorized.toarray()), LogisticRegression.__name__)
+    Gaussian_Model = Gaussian_Regression(x_train, y_train)
+    Spam_printer(w, Gaussian_Model.predict(text_vectorized.toarray()), GaussianNB.__name__)
+    Decision_Model = Decision_Tree(x_train, y_train)
+    Spam_printer(w, Decision_Model.predict(text_vectorized), RandomForestClassifier.__name__)
+    SVM_Model = Support_Vector_Machine(x_train, y_train, x_test, y_test)
+    Spam_printer(w, Decision_Model.predict(text_vectorized), svm.SVC.__name__)
     pass
 
 def main():
@@ -168,19 +182,18 @@ def main():
     y_train, x_train = train_data(Dataset)
     y_test, x_test = test_data(Dataset)
     x_train = [o.split(" ") for o in x_train]
+    vectorizer = fit_vector(x_train)
     print(y_train[0])
     print(x_train[0])
     print(len(x_test))
     print(len(x_train))
-    x_train_features = Vectorize_data(x_train)
-    print(x_train_features)
-    x_train, x_test, y_train, y_test = process_data()
-    print(len(x_train[0]))
-    print(y_train[0])
-    Gaussian_Model = Gaussian_Regression(x_train, y_train)
-    print("Gaussian Model Training set score: {:.3f}".format(Gaussian_Model.score(x_train, y_train)))
-    print("Guassian Model Test set score: {:.3f}".format(Gaussian_Model.score(x_test, y_test)))
-
-    pass
-
-main()
+    x_train_features = Vectorize_data(x_train, vectorizer)
+    x_test_features = Vectorize_data(x_test, vectorizer)
+    random_array = Vectorize_data(["Hey whats good its boo"], vectorizer)
+    clf = MultinomialNB()
+    clf.fit(x_train_features.toarray(), y_train.ravel())
+    model = RandomForestClassifier(n_estimators=100, random_state=0)
+    model.fit(x_train_features.toarray(), y_train.ravel())
+    print(clf.score(x_test_features.toarray(), y_test))
+    print(model.score(x_test_features.toarray(), y_test))
+    print(model.predict(random_array))
