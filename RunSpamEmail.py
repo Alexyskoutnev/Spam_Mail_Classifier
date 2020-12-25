@@ -1,4 +1,3 @@
-import pandas as pd
 import sys
 from Spam_Email_Classifier import solver
 

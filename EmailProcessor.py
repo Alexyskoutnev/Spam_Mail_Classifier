@@ -1,7 +1,6 @@
 import pandas as pd
 import re
 import string
-import nltk
 from nltk.tokenize import word_tokenize
 from collections import Counter
 from nltk.tokenize import word_tokenize
