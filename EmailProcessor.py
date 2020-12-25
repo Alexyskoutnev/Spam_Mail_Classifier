@@ -23,21 +23,10 @@ def read_file():
         df = pd.DataFrame([data_text])
         frame.append(df)
     dataset = pd.concat(frame, ignore_index= True)
-    print(dataset.shape)
     return dataset
 
-def fit_data(dataset):
-    vectorizer = CountVectorizer()
-    raw_sentences = [' '.join(o) for o in dataset['v2']]
-    print(len(raw_sentences))
-    #vectorizer.fit(raw_sentences)
-    pass
-    # vectorizer = TfidfVectorizer()
-    # print(dataset['v2'])
-    # # for MSG in dataset['v2']:
-    # #     x = MSG.split(" ")
-    # raw_sentences = [MSG.split(" ") for MSG in dataset['v2']]
-    # vectorizer.fit(raw_sentences)
+def read_dataframe(text):
+    return pd.DataFrame([email_decoder(text)])
 
 def read_train():
     spam = pd.read_csv('spam.csv', encoding='latin-1')
@@ -87,11 +76,7 @@ def clean_up(text):
     methods = [remove_hyperlink, lower_case, remove_punctuation, remove_newline, remove_whitespace, Stop_Word_Remove, Word_Lemmatizer]
     for func in methods:
         text = func(text)
-    return (text)
-
-def process_text(text):
-    vectorizer = TfidfVectorizer()
-    return vectorizer.transform(text)
+    return text
 
 def email_decoder(data):
     capital_num = sum(1 for c in data if c.isupper())
@@ -115,9 +100,3 @@ def email_decoder(data):
     address_count = x.count("address")
     people_count = x.count("people")
     return {"crl.tot": capital_num, 'dollar': dollar_count, 'bang': bang_count, 'money': money_count, 'n000': zero_count, 'make': make_count, 'free': free_count, 'click': click_count, 'now': now_count, 'cash': cash_count, 'quick': quick_count, 'easy': easy_count, 'offer': offer_count, 'order':order_count, 'email': email_count, 'time': time_count, 'credit': credit_count, 'address': address_count, 'people': people_count}
-
-def main():
-    text = clean_up("running up the house")
-    #process = process_text(text)
-    dataset = read_file()
-    fit_data(dataset)

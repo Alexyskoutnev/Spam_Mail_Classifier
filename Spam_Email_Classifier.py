@@ -14,6 +14,8 @@ from sklearn.feature_extraction.text import TfidfVectorizer
 from sklearn.feature_extraction.text import CountVectorizer
 from EmailProcessor import read_file
 from EmailProcessor import clean_up
+from EmailProcessor import read_dataframe
+import gc
 
 #spam = pd.read_csv('spambase.data')
 
@@ -69,16 +71,17 @@ def Gaussian_Regression(X,Y):
     return model
 
 #LogisticRegression
-def Logistic_Regression(X_train,Y_train, X_test, Y_test):
-        C_range = [0.01, .1, 1, 10, 100, 1000]
-        test_accuracy = -1
-        for i in C_range:
-            model = LogisticRegression(C = i, random_state=0, max_iter= 1000000).fit(X_train, Y_train)
-            test_result = model.score(X_test, Y_test)
-            if (test_result > test_accuracy):
-                test_accuracy = test_result
-                C_max = i
-        model = LogisticRegression(C = C_max, random_state=0).fit(X_train, Y_train)
+def Logistic_Regression(X_train,Y_train):
+        # C_range = [0.01, .1, 1, 10, 100, 1000]
+        # test_accuracy = -1
+        # for i in C_range:
+        #     model = LogisticRegression(C = i, random_state=0, max_iter= 1000000).fit(X_train, Y_train)
+        #     test_result = model.score(X_test, Y_test)
+        #     if (test_result > test_accuracy):
+        #         test_accuracy = test_result
+        #         C_max = i
+
+        model = LogisticRegression(C = 10, random_state=0).fit(X_train, Y_train)
         return model
 
 def Logistic_Model(Dataset):
@@ -86,7 +89,7 @@ def Logistic_Model(Dataset):
     return Log_Model
 
 #Support Vector Machine
-def Support_Vector_Machine(x_train,y_train, x_test, y_test):
+def Support_Vector_Machine(x_train,y_train):
     # kernel_type = ['rbf']
     # C_range = [0.01, 1, 10, 100]
     # test_accuracy = -1
@@ -106,12 +109,12 @@ def Support_Vector_Machine(x_train,y_train, x_test, y_test):
     return model
 
 def Support_Vector_Model(Dataset):
-    SVM_Model = Support_Vector_Machine(*train_data(Dataset), Dataset)
+    SVM_Model = Support_Vector_Machine(*train_data(Dataset))
     return SVM_Model
 
 #Decision Tree
 def Decision_Tree(X, Y):
-    model = RandomForestClassifier(n_estimators=50, random_state=0)
+    model = RandomForestClassifier(n_estimators=100, random_state=0)
     model.fit(X,Y)
     return model
 
@@ -129,6 +132,7 @@ def result(Dataset):
     SVM_Model = Support_Vector_Machine(*train_data(Dataset), Dataset)
     print("SVM Training set score: {:.3f}".format(SVM_Model.score(*train_data(Dataset))))
     print("SVM Test set score: {:.3f}".format(SVM_Model.score(*test_data(Dataset))))
+
 def Spam_printer(w, type, name):
     """
     w writes to the console if
@@ -156,7 +160,6 @@ def spam_solve(r, w):
     Spam_printer(w, Decision_Model.predict(test_output), RandomForestClassifier.__name__)
     SVM_Model = Support_Vector_Model(Dataset)
     Spam_printer(w, SVM_Model.predict(test_output), svm.SVC.__name__)
-    #result(Dataset)
 
 def solver(r,w):
     lines = r.readlines()
@@ -165,17 +168,40 @@ def solver(r,w):
         MSG += x.replace("\n", " ")
     test_output = clean_up(MSG)
     x_train, x_test, y_train, y_test, text_vectorized = process_data(test_output)
-    #Log_Model = Logistic_Regression(x_train,y_train,x_test,y_test)
-    #Spam_printer(w, Log_Model.predict(test_output), LogisticRegression.__name__)
-    Log_model = LogisticRegression().fit(x_train, y_train)
-    Spam_printer(w, Log_model.predict(text_vectorized.toarray()), LogisticRegression.__name__)
-    Gaussian_Model = Gaussian_Regression(x_train, y_train)
-    Spam_printer(w, Gaussian_Model.predict(text_vectorized.toarray()), GaussianNB.__name__)
-    Decision_Model = Decision_Tree(x_train, y_train)
-    Spam_printer(w, Decision_Model.predict(text_vectorized), RandomForestClassifier.__name__)
-    SVM_Model = Support_Vector_Machine(x_train, y_train, x_test, y_test)
-    Spam_printer(w, Decision_Model.predict(text_vectorized), svm.SVC.__name__)
-    pass
+
+    clf = GaussianNB()
+    clf.fit(x_train, y_train)
+
+
+    # Gaussian_Model = Gaussian_Regression(x_train, y_train)
+    # Spam_printer(w, Gaussian_Model.predict(text_vectorized.toarray()), GaussianNB.__name__)
+    # print(Gaussian_Model.score(x_test, y_test))
+
+    # Log_Model = Logistic_Regression(x_train,y_train)
+    # Spam_printer(w, Log_Model.predict(text_vectorized.toarray()), LogisticRegression.__name__)
+    # print("Logistic Regression Test Score: " + str(Log_Model.score(x_test, y_test)))
+    # Decision_Model = Decision_Tree(x_train, y_train)
+    # Spam_printer(w, Decision_Model.predict(text_vectorized), RandomForestClassifier.__name__)
+    # print("Decision Tree Test Score: " + str(Decision_Model.score(x_test, y_test)))
+    # gc.collect()
+
+    # gc.collect()
+    # Dataset = read_train()
+    # test_output = read_dataframe(MSG)
+    # Decision_Model = Decision_Tree_Model(Dataset)
+    # Spam_printer(w, Decision_Model.predict(test_output), RandomForestClassifier.__name__)
+    # print("Decision Tree Test Score: " + str(Decision_Model.score(*test_data(Dataset))))
+    # SVM_Model = Support_Vector_Model(Dataset)
+    # Spam_printer(w, SVM_Model.predict(test_output), svm.SVC.__name__)
+    # print("Support Vector Machine Test Score: " + str(SVM_Model.score(*test_data(Dataset))))
+    # gc.collect()
+
+
+
+    # SVM_Model = Support_Vector_Machine(*Dataset)
+    # Spam_printer(w, SVM_Model.predict(["HEy what good"]), svm.SVC.__name__)
+    # print(SVM_Model.score(x_test,x_train))
+    # gc.collect()
 
 def main():
     Dataset = read_file()
