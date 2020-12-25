@@ -10,6 +10,7 @@ import matplotlib.pyplot as plt
 from EmailProcessor import read_file
 from EmailProcessor import read_train
 from sklearn.metrics import classification_report, confusion_matrix
+from sklearn.feature_extraction.text import TfidfVectorizer
 
 #spam = pd.read_csv('spambase.data')
 
@@ -19,12 +20,17 @@ def train_data(data):
     Y = data.iloc[:, -1].values
     x_train, x_test, y_train, y_test = sklearn.model_selection.train_test_split(X, Y, test_size=0.2, random_state=0)
     return x_train, y_train
+
 def test_data(data):
     X = data.iloc[:, :-1].values
     Y = data.iloc[:, -1].values
     x_train, x_test, y_train, y_test = sklearn.model_selection.train_test_split(X, Y, test_size=0.2, random_state=0)
     return x_test, y_test
 
+def process_data(data):
+    #Message = X.split(" ")
+    vectorizer = TfidfVectorizer()
+    return vectorizer.transform(data)
 #LogisticRegression
 def Logistic_Regression(X,Y, dataset):
         C_range = [0.01, .1, 1, 10, 100, 1000]
