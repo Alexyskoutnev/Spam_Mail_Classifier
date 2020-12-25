@@ -7,10 +7,13 @@ from sklearn.tree import DecisionTreeClassifier
 from sklearn.ensemble import RandomForestClassifier
 from sklearn.model_selection import cross_val_score
 import matplotlib.pyplot as plt
-from EmailProcessor import read_file
 from EmailProcessor import read_train
 from sklearn.metrics import classification_report, confusion_matrix
 from sklearn.feature_extraction.text import TfidfVectorizer
+from sklearn.feature_extraction.text import CountVectorizer
+from EmailProcessor import read_file
+from sklearn.naive_bayes import GaussianNB
+from EmailProcessor import clean_up
 
 #spam = pd.read_csv('spambase.data')
 
@@ -27,10 +30,39 @@ def test_data(data):
     x_train, x_test, y_train, y_test = sklearn.model_selection.train_test_split(X, Y, test_size=0.2, random_state=0)
     return x_test, y_test
 
-def process_data(data):
-    #Message = X.split(" ")
+def process_data():
+    Dataset = read_file()
+    y_train, x_train = train_data(Dataset)
+    y_test, x_test = test_data(Dataset)
+    x_train = [txt.split(" ") for txt in x_train]
+    x_test = [txt.split(" ") for txt in x_test]
+    x_train_features = Vectorize_data(x_train)
+    x_test_features = Vectorize_data(x_test)
+    return x_train_features.toarray(), x_test_features.toarray(), y_train, y_test
+
+
+def Vectorize_data(data):
     vectorizer = TfidfVectorizer()
-    return vectorizer.transform(data)
+    sentences = [' '.join(txt) for txt in data]
+    vectorizer.fit(sentences)
+    return vectorizer.transform(sentences)
+
+def data_features(data):
+    vectorizer = TfidfVectorizer()
+    raw_sentences = [' '.join(o) for o in data]
+    return vectorizer.transform(raw_sentences)
+
+# def process_data(data):
+#     #Message = X.split(" ")
+#     vectorizer = TfidfVectorizer()
+#     return vectorizer.transform(data)
+
+#Gaussian Regression
+def Gaussian_Regression(X,Y):
+    model = GaussianNB()
+    model.fit(X,Y)
+    return model
+
 #LogisticRegression
 def Logistic_Regression(X,Y, dataset):
         C_range = [0.01, .1, 1, 10, 100, 1000]
@@ -118,3 +150,37 @@ def spam_solve(r, w):
     SVM_Model = Support_Vector_Model(Dataset)
     Spam_printer(w, SVM_Model.predict(test_output), svm.SVC.__name__)
     #result(Dataset)
+
+def solver(r,w):
+    Dataset = read_file()
+    lines = r.readlines()
+    MSG = ''
+    for x in lines:
+        MSG += x.replace("\n", " ")
+    test_output = clean_up(MSG).split(" ")
+    test_output_features = Vectorize_data(test_output)
+    x_train, x_test, y_train, y_test = process_data()
+    Gaussian_Model = Gaussian_Regression()
+    pass
+
+def main():
+    Dataset = read_file()
+    y_train, x_train = train_data(Dataset)
+    y_test, x_test = test_data(Dataset)
+    x_train = [o.split(" ") for o in x_train]
+    print(y_train[0])
+    print(x_train[0])
+    print(len(x_test))
+    print(len(x_train))
+    x_train_features = Vectorize_data(x_train)
+    print(x_train_features)
+    x_train, x_test, y_train, y_test = process_data()
+    print(len(x_train[0]))
+    print(y_train[0])
+    Gaussian_Model = Gaussian_Regression(x_train, y_train)
+    print("Gaussian Model Training set score: {:.3f}".format(Gaussian_Model.score(x_train, y_train)))
+    print("Guassian Model Test set score: {:.3f}".format(Gaussian_Model.score(x_test, y_test)))
+
+    pass
+
+main()

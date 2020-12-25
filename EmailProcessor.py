@@ -11,6 +11,7 @@ from nltk.corpus import wordnet as wn
 from nltk.corpus import stopwords
 from nltk.tokenize import word_tokenize
 from sklearn.feature_extraction.text import TfidfVectorizer
+from sklearn.feature_extraction.text import CountVectorizer
 
 def read_file():
     spam = pd.read_csv('spam.csv', encoding='latin-1')
@@ -24,6 +25,19 @@ def read_file():
     dataset = pd.concat(frame, ignore_index= True)
     print(dataset.shape)
     return dataset
+
+def fit_data(dataset):
+    vectorizer = CountVectorizer()
+    raw_sentences = [' '.join(o) for o in dataset['v2']]
+    print(len(raw_sentences))
+    #vectorizer.fit(raw_sentences)
+    pass
+    # vectorizer = TfidfVectorizer()
+    # print(dataset['v2'])
+    # # for MSG in dataset['v2']:
+    # #     x = MSG.split(" ")
+    # raw_sentences = [MSG.split(" ") for MSG in dataset['v2']]
+    # vectorizer.fit(raw_sentences)
 
 def read_train():
     spam = pd.read_csv('spam.csv', encoding='latin-1')
@@ -103,7 +117,7 @@ def email_decoder(data):
     return {"crl.tot": capital_num, 'dollar': dollar_count, 'bang': bang_count, 'money': money_count, 'n000': zero_count, 'make': make_count, 'free': free_count, 'click': click_count, 'now': now_count, 'cash': cash_count, 'quick': quick_count, 'easy': easy_count, 'offer': offer_count, 'order':order_count, 'email': email_count, 'time': time_count, 'credit': credit_count, 'address': address_count, 'people': people_count}
 
 def main():
-    text = clean_up("running up the 6 with the hoes, you know that shit dont matter")
+    text = clean_up("running up the house")
     #process = process_text(text)
-    read_file()
-main()
+    dataset = read_file()
+    fit_data(dataset)
