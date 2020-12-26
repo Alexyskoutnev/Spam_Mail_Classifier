@@ -18,13 +18,14 @@ from EmailProcessor import read_dataframe
 import gc
 
 
-#Split Data into train and test subsets
+#Split Data into train subset
 def train_data(data):
     X = data.iloc[:, :-1].values
     Y = data.iloc[:, -1].values
     x_train, x_test, y_train, y_test = sklearn.model_selection.train_test_split(X, Y, test_size=0.2, random_state=0)
     return x_train, y_train
 
+#Split Data into test subset
 def test_data(data):
     X = data.iloc[:, :-1].values
     Y = data.iloc[:, -1].values
@@ -40,12 +41,12 @@ def process_data(output):
     vectorizer = fit_vector(x_train)
     x_train_features = Vectorize_data(x_train, vectorizer)
     x_test_features = Vectorize_data(x_test, vectorizer)
-    x_output = Vectorize_data(output, vectorizer)
+    x_output = Vectorize_data(output.split(" "), vectorizer)
     return x_train_features.toarray(), x_test_features.toarray(), y_train.ravel(), y_test.ravel(), x_output
 
 def fit_vector(data):
-    vectorizer = CountVectorizer()
-    raw_sentences = [' '.join(o) for o in data]
+    vectorizer = TfidfVectorizer()
+    raw_sentences = [' '.join(txt) for txt in data]
     vectorizer.fit(raw_sentences)
     return vectorizer
 
@@ -128,6 +129,10 @@ def spam_solve(r, w):
     Spam_printer(w, SVM_Model.predict(test_output), svm.SVC.__name__)
 
 def solver(r,w):
+    """
+    r a reader
+    w a writer
+    """
     lines = r.readlines()
     MSG = ''
     for x in lines:
@@ -152,14 +157,3 @@ def solver(r,w):
     print("SVM Test set score: {:.3f}".format(SVM_Model.score(*test_data(Dataset))))
     gc.collect()
 
-    # Decision_Model = Decision_Tree(x_train, y_train)
-    # Spam_printer(w, Decision_Model.predict(text_vectorized), RandomForestClassifier.__name__)
-    # print("Decision Tree Test Score: " + str(Decision_Model.score(x_test, y_test)))
-    # gc.collect()
-
-
-
-    # SVM_Model = Support_Vector_Machine(*Dataset)
-    # Spam_printer(w, SVM_Model.predict(["HEy what good"]), svm.SVC.__name__)
-    # print(SVM_Model.score(x_test,x_train))
-    # gc.collect()
