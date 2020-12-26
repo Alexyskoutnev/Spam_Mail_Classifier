@@ -13,6 +13,9 @@ This project utilizes machine learning alogrithms such as Support Vector Machine
 
 
 Gaussian Model Test Score: 0.880
+
 Logistic Model Test Score: 0.978
+
 Decision Tree Test set score: 0.939
+
 SVM Test set score: 0.927
