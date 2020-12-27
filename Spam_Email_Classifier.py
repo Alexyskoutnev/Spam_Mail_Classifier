@@ -60,7 +60,7 @@ def Vectorize_output(data, vectorizer):
 
 #Neural Network
 def Neural_Network(X,Y):
-    model = MLPClassifier(solver= "lbfgs")
+    model = MLPClassifier(solver= "lbfgs", hidden_layer_sizes= [100, 100], max_iter= 1000)
     return model.fit(X,Y)
 
 #Gaussian Regression
