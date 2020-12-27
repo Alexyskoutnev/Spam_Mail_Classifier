@@ -12,6 +12,7 @@ from sklearn.naive_bayes import MultinomialNB, GaussianNB, BernoulliNB
 from sklearn.metrics import classification_report, confusion_matrix
 from sklearn.feature_extraction.text import TfidfVectorizer
 from sklearn.feature_extraction.text import CountVectorizer
+from sklearn.neural_network import MLPClassifier
 from EmailProcessor import read_file
 from EmailProcessor import clean_up
 from EmailProcessor import read_dataframe
@@ -41,7 +42,7 @@ def process_data(output):
     vectorizer = fit_vector(x_train)
     x_train_features = Vectorize_data(x_train, vectorizer)
     x_test_features = Vectorize_data(x_test, vectorizer)
-    x_output = Vectorize_data(output.split(" "), vectorizer)
+    x_output = Vectorize_output(output.split(" "), vectorizer)
     return x_train_features.toarray(), x_test_features.toarray(), y_train.ravel(), y_test.ravel(), x_output
 
 def fit_vector(data):
@@ -53,6 +54,14 @@ def fit_vector(data):
 def Vectorize_data(data, vectorizer):
     sentences = [' '.join(txt) for txt in data]
     return vectorizer.transform(sentences)
+
+def Vectorize_output(data, vectorizer):
+    return vectorizer.transform(data)
+
+#Neural Network
+def Neural_Network(X,Y):
+    model = MLPClassifier(solver= "lbfgs")
+    return model.fit(X,Y)
 
 #Gaussian Regression
 def Gaussian_Regression(X,Y):
@@ -142,6 +151,10 @@ def solver(r,w):
     Gaussian_Model = Gaussian_Regression(x_train, y_train)
     Spam_printer(w, Gaussian_Model.predict(text_vectorized.toarray()), GaussianNB.__name__)
     print("Gaussian Model Test Score: {:.3f}".format(Gaussian_Model.score(x_test, y_test)))
+    gc.collect()
+    Neural_Model = Neural_Network(x_train, y_train)
+    Spam_printer(w, Neural_Model.predict(text_vectorized.toarray()), MLPClassifier.__name__)
+    print("Neural Network Test Score: {:.3f}".format(Neural_Model.score(x_test, y_test)))
     gc.collect()
     Log_Model = Logistic_Regression(x_train,y_train)
     Spam_printer(w, Log_Model.predict(text_vectorized.toarray()), LogisticRegression.__name__)
